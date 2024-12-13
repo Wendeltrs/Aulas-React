@@ -1,7 +1,8 @@
-export default function Home() {
+'use client';
+import { Routes } from "./routes";
+
+export default function App() {
   return (
-    <div>
-      <p>Olá!</p>
-    </div>
+    <Routes/>
   );
 }
