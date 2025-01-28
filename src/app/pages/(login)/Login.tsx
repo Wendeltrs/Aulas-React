@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { InputLogin } from "./components/inputLogin";
+import { InputLogin } from "./components/InputLogin";
+import { ButtonLogin } from "./components/ButtonLogin";
 
 export const Login = () => {
     const inputPasswordRef = useRef<HTMLInputElement>(null);
@@ -34,7 +35,11 @@ export const Login = () => {
                         onChange={newValue => setPassword(newValue)}
                     />
 
-                    <button onClick={handleClick} type="button">Entrar</button>
+                    <ButtonLogin type="button" onClick={handleClick}>
+                        Entrar
+                    </ButtonLogin>
+
+                    <ButtonLogin type="submit">Enviar</ButtonLogin>
                 </form>
             </div>
         </>
