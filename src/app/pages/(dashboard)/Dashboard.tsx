@@ -1,7 +1,12 @@
 import { useCallback, useState } from "react";
 
+interface IListItem {
+    title: string;
+    isSelected: boolean;
+}
+
 export const Dashboard = () => {
-    const [lista, setLista] = useState<string[]>(['a', 'b', 'c']);
+    const [lista, setLista] = useState<IListItem[]>([]);
 
     const handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = useCallback((e) => {
         if (e.key === 'Enter') {
@@ -12,12 +17,16 @@ export const Dashboard = () => {
             e.currentTarget.value = '';
 
             setLista((oldLista) => {
-                if (oldLista.includes(value)) return oldLista;    
+                if (oldLista.some(item => item.title === value)) return oldLista;    
 
-                return [...oldLista, value]
+                return [
+                    ...oldLista, 
+                    {
+                        title: value,
+                        isSelected: false
+                    }
+                ]
             })
-
-            e.currentTarget.value = '';
         }
     }, []);
 
@@ -29,9 +38,31 @@ export const Dashboard = () => {
                 onKeyDown={handleInputKeyDown}
             />
 
+            <p>{lista.filter(item => item.isSelected).length}</p>
+
             <ul>
-                {lista.map((value) => {
-                    return <li key={value}>{value}</li>
+                {lista.map((itens) => {
+                    return <li key={itens.title}>
+                        <input 
+                            type="checkbox" 
+                            checked={itens.isSelected}
+                            onChange={
+                                () => setLista(oldItens => {
+                                    return oldItens.map(item => {
+                                        const newIsSelected = item.title === itens.title 
+                                        ? !item.isSelected 
+                                        : item.isSelected;
+                                        
+                                        return {
+                                            ...item,
+                                            isSelected: newIsSelected
+                                        }
+                                    })
+                                })
+                            }
+                        />                    
+                        {itens.title}
+                    </li>
                 })}
             </ul>
         </>
