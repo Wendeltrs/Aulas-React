@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
 
-interface IListItem {
+interface ITarefa {
+    id: number;
     title: string;
-    isSelected: boolean;
+    isCompleted: boolean;
 }
 
 export const Dashboard = () => {
-    const [lista, setLista] = useState<IListItem[]>([]);
+    const [lista, setLista] = useState<ITarefa[]>([]);
 
     const handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = useCallback((e) => {
         if (e.key === 'Enter') {
@@ -23,7 +24,8 @@ export const Dashboard = () => {
                     ...oldLista, 
                     {
                         title: value,
-                        isSelected: false
+                        isCompleted: false,
+                        id: oldLista.length,
                     }
                 ]
             })
@@ -38,24 +40,24 @@ export const Dashboard = () => {
                 onKeyDown={handleInputKeyDown}
             />
 
-            <p>{lista.filter(item => item.isSelected).length}</p>
+            <p>{lista.filter(item => item.isCompleted).length}</p>
 
             <ul>
                 {lista.map((itens) => {
-                    return <li key={itens.title}>
+                    return <li key={itens.id}>
                         <input 
                             type="checkbox" 
-                            checked={itens.isSelected}
+                            checked={itens.isCompleted}
                             onChange={
                                 () => setLista(oldItens => {
                                     return oldItens.map(item => {
-                                        const newIsSelected = item.title === itens.title 
-                                        ? !item.isSelected 
-                                        : item.isSelected;
+                                        const newIsCompleted = item.title === itens.title 
+                                        ? !item.isCompleted 
+                                        : item.isCompleted;
                                         
                                         return {
                                             ...item,
-                                            isSelected: newIsSelected
+                                            isCompleted: newIsCompleted
                                         }
                                     })
                                 })
