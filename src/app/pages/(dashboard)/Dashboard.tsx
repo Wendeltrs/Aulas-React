@@ -1,13 +1,17 @@
-import { useCallback, useState } from "react";
-
-interface ITarefa {
-    id: number;
-    title: string;
-    isCompleted: boolean;
-}
+import { ApiException } from "@/app/shared/services/api/ApiException";
+import { ITarefa, TarefasService } from "@/app/shared/services/api/tarefas/TarefasService";
+import { useCallback, useEffect, useState } from "react";
 
 export const Dashboard = () => {
     const [lista, setLista] = useState<ITarefa[]>([]);
+
+    useEffect(() => {
+        TarefasService.getAll()
+            .then((result) => {
+                if (result instanceof ApiException) return alert(result.message);
+                setLista(result);
+            })
+    }, []);
 
     const handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = useCallback((e) => {
         if (e.key === 'Enter') {
@@ -17,18 +21,13 @@ export const Dashboard = () => {
 
             e.currentTarget.value = '';
 
-            setLista((oldLista) => {
-                if (oldLista.some(item => item.title === value)) return oldLista;    
+            if (lista.some(item => item.title === value)) return;
 
-                return [
-                    ...oldLista, 
-                    {
-                        title: value,
-                        isCompleted: false,
-                        id: oldLista.length,
-                    }
-                ]
-            })
+            TarefasService.create({ title: value, isCompleted: false })
+                .then((result) => {
+                    if (result instanceof ApiException) return alert(result.message);
+                    setLista(oldItens => [...oldItens, result]);
+                });
         }
     }, []);
 
@@ -36,7 +35,7 @@ export const Dashboard = () => {
         <>
             <p>Lista</p>
 
-            <input 
+            <input
                 onKeyDown={handleInputKeyDown}
             />
 
@@ -45,16 +44,16 @@ export const Dashboard = () => {
             <ul>
                 {lista.map((itens) => {
                     return <li key={itens.id}>
-                        <input 
-                            type="checkbox" 
+                        <input
+                            type="checkbox"
                             checked={itens.isCompleted}
                             onChange={
                                 () => setLista(oldItens => {
                                     return oldItens.map(item => {
-                                        const newIsCompleted = item.title === itens.title 
-                                        ? !item.isCompleted 
-                                        : item.isCompleted;
-                                        
+                                        const newIsCompleted = item.title === itens.title
+                                            ? !item.isCompleted
+                                            : item.isCompleted;
+
                                         return {
                                             ...item,
                                             isCompleted: newIsCompleted
@@ -62,7 +61,7 @@ export const Dashboard = () => {
                                     })
                                 })
                             }
-                        />                    
+                        />
                         {itens.title}
                     </li>
                 })}
