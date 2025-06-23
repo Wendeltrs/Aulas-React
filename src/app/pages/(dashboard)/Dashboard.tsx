@@ -1,5 +1,6 @@
 import { ApiException } from "@/app/shared/services/api/ApiException";
 import { ITarefa, TarefasService } from "@/app/shared/services/api/tarefas/TarefasService";
+import { IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 
 export const Dashboard = () => {
@@ -29,6 +30,34 @@ export const Dashboard = () => {
                     setLista(oldItens => [...oldItens, result]);
                 });
         }
+    }, [lista]);
+
+    const handleToggleCompleted = useCallback((id: number) => {
+        const tarefaUpdate = lista.find(item => item.id === id);
+
+        if (!tarefaUpdate) return;
+
+        TarefasService.updateById(id, { ...tarefaUpdate, isCompleted: !tarefaUpdate.isCompleted })
+            .then((result) => {
+                if (result instanceof ApiException) return alert(result.message);
+                
+                setLista(oldItens => {
+                    return oldItens.map(item => {
+                        if (item.id === id) return result;
+
+                        return item;
+                    })
+                })
+            });
+    }, [lista]);
+
+    const handleDelete = useCallback((id: number) => {
+        TarefasService.deleteteById(id)
+            .then((result) => {
+                if (result instanceof ApiException) return alert(result.message);
+
+                setLista(oldItens => oldItens.filter(item => item.id !== id));
+            });
     }, []);
 
     return (
@@ -43,27 +72,25 @@ export const Dashboard = () => {
 
             <ul>
                 {lista.map((itens) => {
-                    return <li key={itens.id}>
-                        <input
-                            type="checkbox"
-                            checked={itens.isCompleted}
-                            onChange={
-                                () => setLista(oldItens => {
-                                    return oldItens.map(item => {
-                                        const newIsCompleted = item.title === itens.title
-                                            ? !item.isCompleted
-                                            : item.isCompleted;
-
-                                        return {
-                                            ...item,
-                                            isCompleted: newIsCompleted
-                                        }
-                                    })
-                                })
-                            }
-                        />
-                        {itens.title}
-                    </li>
+                    return (
+                        <li key={itens.id}>
+                            <div
+                                key={itens.id}
+                                style={{ display: 'flex', alignItems: 'center', gap: 3 }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={itens.isCompleted}
+                                    onChange={() => handleToggleCompleted(itens.id)}
+                                />
+                                {itens.title}
+                                <IconTrash 
+                                    size={16}
+                                    onClick={() => handleDelete(itens.id)}
+                                />
+                            </div>
+                        </li>
+                    )
                 })}
             </ul>
         </>
